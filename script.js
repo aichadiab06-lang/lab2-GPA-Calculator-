@@ -1,40 +1,39 @@
-function addCourse() {
-    var row = document.createElement('div');
-    row.className = 'course-row';
-    row.innerHTML = 
-        '<label>Course:</label> ' +
-        '<input type="text" name="course[]" placeholder="e.g. Mathematics" required> ' +
-        '<label>Credits:</label> ' +
-        '<input type="number" name="credits[]" placeholder="e.g. 3" min="1" required> ' +
-        '<label>Grade:</label> ' +
-        '<select name="grade[]">' +
-            '<option value="4.0">A / A+</option>' +
-            '<option value="3.0">B</option>' +
-            '<option value="2.0">C</option>' +
-            '<option value="1.0">D</option>' +
-            '<option value="0.0">F</option>' +
-        '</select>' +
-        '<button type="button" onclick="this.parentNode.remove()">Remove</button>';
-    document.getElementById('courses').appendChild(row);
-}
+$(document).ready(function () {
+    $('#addCourse').click(function () {
+        var row = $('.course-row').first().clone();
+        row.find('input').val('');
+        row.append('<div class="col-auto"><button type="button" class="btn btn-danger remove-row">X</button></div>');
+        $('#courses').append(row);
+    });
 
-function validateForm() {
-    var courses = document.querySelectorAll('input[name="course[]"]');
-    var credits = document.querySelectorAll('input[name="credits[]"]');
-    
-    for (var i = 0; i < courses.length; i++) {
-        if (courses[i].value === "") {
-            alert("All course name fields are required.");
-            return false;
+    $(document).on('click', '.remove-row', function () {
+        if ($('.course-row').length > 1) {
+            $(this).closest('.course-row').remove();
         }
-    }
-    
-    for (var j = 0; j < credits.length; j++) {
-        if (isNaN(credits[j].value) || credits[j].value <= 0) {
-            alert("Credit hours must be positive numbers.");
-            return false;
-        }
-    }
-    
-    return true;
-}
+    });
+
+    $('#gpaForm').submit(function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: 'calculate.php',
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    var alertClass = 'alert-info';
+                    if (response.gpa >= 3.7) alertClass = 'alert-success';
+                    else if (response.gpa >= 2.0) alertClass = 'alert-warning';
+                    else alertClass = 'alert-danger';
+
+                    $('#result').html('<div class="alert ' + alertClass + '">' + response.message + '</div>' + response.tableHtml);
+                } else {
+                    $('#result').html('<div class="alert alert-danger">' + response.message + '</div>');
+                }
+            },
+            error: function () {
+                $('#result').html('<div class="alert alert-danger">Server error.</div>');
+            }
+        });
+    });
+});
