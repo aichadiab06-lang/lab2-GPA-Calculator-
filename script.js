@@ -1,8 +1,9 @@
+
 $(document).ready(function () {
     $('#addCourse').click(function () {
         var row = $('.course-row').first().clone();
         row.find('input').val('');
-        row.append('<div class="col-auto"><button type="button" class="btn btn-danger remove-row">X</button></div>');
+        row.append('<div class="col-md-1"><button type="button" class="btn btn-danger remove-row">×</button></div>');
         $('#courses').append(row);
     });
 
@@ -14,6 +15,8 @@ $(document).ready(function () {
 
     $('#gpaForm').submit(function (e) {
         e.preventDefault();
+        $('#result').html('<div class="alert alert-secondary text-center">جاري حساب المعدل...</div>');
+
         $.ajax({
             url: 'calculate.php',
             type: 'POST',
@@ -26,14 +29,14 @@ $(document).ready(function () {
                     else if (response.gpa >= 2.0) alertClass = 'alert-warning';
                     else alertClass = 'alert-danger';
 
-                    $('#result').html('<div class="alert ' + alertClass + '">' + response.message + '</div>' + response.tableHtml);
+                    $('#result').html('<div class="alert ' + alertClass + ' text-center fw-bold">' + response.message + '</div>' + response.tableHtml);
                 } else {
-                    $('#result').html('<div class="alert alert-danger">' + response.message + '</div>');
+                    $('#result').html('<div class="alert alert-danger text-center">' + response.message + '</div>');
                 }
             },
             error: function () {
-                $('#result').html('<div class="alert alert-danger">Server error.</div>');
-            }
+                $('#result').html('<div class="alert alert-danger text-center">خطأ في الاتصال بالخادم.</div>');
+             }
         });
     });
 });
