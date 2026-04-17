@@ -1,18 +1,19 @@
+> Aicha diab:
 <?php
 header('Content-Type: application/json');
 
 if (isset($_POST['course'], $_POST['credits'], $_POST['grade'])) {
-    $courses     = $_POST['course'];
-    $credits     = $_POST['credits'];
-    $grades      = $_POST['grade'];
-    $totalPoints = 0;
+    $courses      = $_POST['course'];
+    $credits      = $_POST['credits'];
+    $grades       = $_POST['grade'];
+    $totalPoints  = 0;
     $totalCredits = 0;
 
-    $tableHtml = '<table class="table table-bordered mt-3">';
-    $tableHtml .= '<thead class="thead-dark">
+    $tableHtml = '<table class="table table-bordered mt-3 text-center">';
+    $tableHtml .= '<thead class="table-dark">
                     <tr>
-                        <th>Course</th><th>Credits</th>
-                        <th>Grade</th><th>Grade Points</th>
+                        <th>المادة</th><th>المعامل</th>
+                        <th>النقطة</th><th>النقاط المكتسبة</th>
                     </tr>
                    </thead><tbody>';
 
@@ -20,10 +21,13 @@ if (isset($_POST['course'], $_POST['credits'], $_POST['grade'])) {
         $course = htmlspecialchars($courses[$i]);
         $cr     = floatval($credits[$i]);
         $sg     = floatval($grades[$i]);
+        
         if ($cr <= 0) continue;
-        $pts          = $cr * $sg;
-        $totalPoints += $pts;
+        
+        $pts           = $cr * $sg;
+        $totalPoints  += $pts;
         $totalCredits += $cr;
+        
         $tableHtml .= "<tr>
                         <td>$course</td><td>$cr</td>
                         <td>$sg</td><td>$pts</td>
@@ -33,34 +37,35 @@ if (isset($_POST['course'], $_POST['credits'], $_POST['grade'])) {
 
     if ($totalCredits > 0) {
         $gpa = $totalPoints / $totalCredits;
+        
         if ($gpa >= 3.7) {
-            $interpretation = "Distinction";
+            $interpretation = "ممتاز (Distinction)";
         } elseif ($gpa >= 3.0) {
-            $interpretation = "Merit";
+            $interpretation = "جيد جداً (Merit)";
         } elseif ($gpa >= 2.0) {
-            $interpretation = "Pass";
+            $interpretation = "قريب من الجيد (Pass)";
         } else {
-            $interpretation = "Fail";
+            $interpretation = "راسب (Fail)";
         }
 
-        $message = "Your GPA is " . number_format($gpa, 2) . " ($interpretation).";
+        $message = "معدلك الفصلي هو " . number_format($gpa, 2) . " ($interpretation).";
 
         echo json_encode([
             'success'   => true,
-            'gpa'       => $gpa,
+            'gpa'       => number_format($gpa, 2),
             'message'   => $message,
             'tableHtml' => $tableHtml,
         ]);
     } else {
         echo json_encode([
             'success' => false,
-            'message' => 'No valid courses entered.',
+            'message' => 'الرجاء إدخال مواد ومعاملات صحيحة.',
         ]);
     }
 } else {
     echo json_encode([
         'success' => false,
-        'message' => 'Data not received.',
+        'message' => 'لم يتم استقبال أي بيانات.',
     ]);
 }
 exit;
